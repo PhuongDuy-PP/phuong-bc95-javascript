@@ -54,3 +54,11 @@ console.log("btn1: ", btn1)
 
 console.log("17/3: ", 17/3)
 console.log("17/3: ", Math.floor(17/3))
+
+// HEAD
+// th1: revert 1 hoặc nhiều commit đầu tiên: HEAD~n
+
+// TH2: gom nhiều commit về 1 commit. Làm đẹp lịch sử push code
+// git rebase -i HEAD~n
+
+// TH3: để quay lại n commit để lấy code cũ
