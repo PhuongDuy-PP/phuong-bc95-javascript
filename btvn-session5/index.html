@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body>
+    <main>
+        <h1 class="text-3xl font-bold text-center mb-5">Tính điểm tuyển sinh</h1>
+
+        <!-- bài 1: Tính điểm trung bình -->
+        <section class="bg-gray-100 rounded-lg shadow-lg p-6">
+            <form id="formXetTuyen" class="space-y-4">
+                <div>
+                    <label class="block font-medium mb-1">Điểm chuẩn</label>
+                    <input
+                        id="diemChuan"
+                        type="number"
+                        step="0.01"
+                        name="diemChuan"
+                        class="w-full border rounded-sm px-3 py-2"
+                        placeholder="Mời nhập điểm chuẩn"
+                        required
+                    >
+                    <p id="errorDiemChuan" class="hidden text-red-400"></p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4">
+
+                    <div>
+                        <label class="block font-medium mb-1">Điểm môn 1</label>
+                        <input
+                            id="diemMon1"
+                            type="number"
+                            step="0.01"
+                            name="diemMon1"
+                            class="w-full border rounded-sm px-3 py-2"
+                            placeholder="Mời nhập điểm môn 1"
+                            required
+                        >
+                        <p id="errorDiemMon1" class="hidden text-red-400"></p>
+                    </div>
+
+                    <div>
+                        <label class="block font-medium mb-1">Điểm môn 2</label>
+                        <input
+                            id="diemMon2"
+                            type="number"
+                            step="0.01"
+                            name="diemMon2"
+                            class="w-full border rounded-sm px-3 py-2"
+                            placeholder="Mời nhập điểm môn 2"
+                            required
+                        >
+                        <p id="errorDiemMon2" class="hidden text-red-400"></p>
+                    </div>
+
+                    <div>
+                        <label class="block font-medium mb-1">Điểm môn 3</label>
+                        <input
+                            id="diemMon3"
+                            type="number"
+                            step="0.01"
+                            name="diemMon3"
+                            class="w-full border rounded-sm px-3 py-2"
+                            placeholder="Mời nhập điểm môn 3"
+                            required
+                        >
+                        <p id="errorDiemMon3" class="hidden text-red-400"></p>
+                    </div>
+                </div>
+
+                <!-- khu vực - đối tượng -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-medium mb-1">Khu vực</label>
+                        <select id="khuVuc" name="khuVuc" class="w-full border rounded-sm px-3 py-2" required>
+                            <option value="">Mời chọn khu vực</option>
+                            <option value="A">Khu vực A</option>
+                            <option value="B">Khu vực B</option>
+                            <option value="C">Khu vực C</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-medium mb-1">Đối tượng</label>
+                        <select id="doiTuong" name="doiTuong" class="w-full border rounded-sm px-3 py-2" required>
+                            <option value="">Mời chọn đối tượng</option>
+                            <option value="1">Đối tượng 1</option>
+                            <option value="2">Đối tượng 2</option>
+                            <option value="3">Đối tượng 3</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button id="btnTinhDiem" type="submit" class="bg-green-400 rounded-md px-3 py-2">
+                    Tính điểm trung bình
+                </button>
+            </form>
+        </section>
+    </main>
+    <script src="js/bai1.js"></script>
+</body>
+</html>
