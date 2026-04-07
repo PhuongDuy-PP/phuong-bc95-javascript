@@ -6,6 +6,7 @@ const el = {
     danhSachSP: document.getElementById("danhSachSP"),
     loading: document.getElementById("loading"),
     searchSP: document.getElementById("searchInput"),
+    filterSP: document.getElementById("filterSelect"),
     // popup chi tiết sản phẩm
     popup: document.getElementById("popupChiTiet"),
     btnClosePopup: document.getElementById("btnClose"),
@@ -15,9 +16,12 @@ const el = {
     // giỏ hàng
     popupGioHang: document.getElementById("popupGioHang"),
     overlayGioHang: document.getElementById("overlayGioHang"),
+    noiDungGioHang: document.getElementById("noiDungGioHang"),
 
     // header
     btnGioHang: document.getElementById("btnGioHang"),
+    // dom tới thẻ hiển thị số lượng sản phẩm trong giỏ hàng (nếu có)
+    badgeGioHang: document.getElementById("badgeGioHang"),
 
 }
 
@@ -25,8 +29,67 @@ const el = {
 let danhSachSP = []
 let gioHang = []
 
-// define các hàm: call aPI, filter sản phẩm, thêm vào giỏ hàng,...
+// define các hàm: call aPI, filter sản phẩm,  thêmvào giỏ hàng,...
+const filterSP = () => {
+    // B1: lấy giá trị từ ô search và select
+    // NGUYÊN TẮC: toLowerCase: chuyển chuỗi về chữ thường, trim: xóa khoảng trắng đầu và cuối chuỗi
+    const keyword = el.searchSP.value.toLowerCase().trim()
+    const type = el.filterSP.value
 
+    // tạo biến để lưu ket quả sau khi filter
+    let ketQua = [...danhSachSP]
+
+    // B2: lọc sản phẩm theo từ khóa và loại sản phẩm
+    // B2.1: filter theo từ khóa
+    if (keyword) {
+        ketQua = ketQua.filter((phone) => {
+            // tên phone
+            const phoneName = phone.name.toLowerCase()
+            // mô tả phone
+            const phoneDesc = phone.desc.toLowerCase()
+            // tương lai: filter cấu hình: screen, cam trước, cam sau,...
+
+            // includes: tìm kiếm tương đối, trả về true nếu chuỗi chứa từ khóa, ngược lại trả về false
+            return phoneName.includes(keyword) || phoneDesc.includes(keyword)
+        })
+    }
+
+    // B2.2: filter theo loại sản phẩm
+    if (type !== "") { // nếu type khác rỗng (tức là có chọn loại sản phẩm)
+        ketQua = ketQua.filter((phone) => phone.type.toLowerCase() === type.toLowerCase())
+    }
+
+    // B3: hiển thị kết quả sau khi filter
+    renderDanhSachSP(ketQua)
+}
+
+// thêm event cho ô search và select để gọi hàm filterSP mỗi khi user nhập vào ô search
+// và chọn loại sản phẩm
+
+// input -> event là input
+// VD: user gõ iphone -> event input sẽ kích hoạt 6 lần tương ứng với 6 ký tự nhập vào
+// "i" -> "ip" -> "iph" -> "ipho" -> "iphon" -> "iphone"
+// YÊU CẦU THÊM: thêm tính năng debounce để tối ưu hiệu suất khi filter sản phẩm,
+// tránh gọi hàm filter quá nhiều lần khi user nhập vào ô search
+
+// tạo biến timerId để lưu id của timer (để hủy timer khi user nhập tiếp)
+// VD: user gõ iphon -> lưu timerId -> 1s sau gọi hàm filterSP,
+// nếu user tiếp tục gõ chữ "e" -> hủy timer cũ và tạo timer mới
+let timerId = null
+const debounce = () => {
+    // HỦY TIMER CŨ NẾU USER NHẬP TIẾP
+    clearTimeout(timerId)
+
+    // TẠO TIMER MỚI, 1s sau gọi hàm filterSP
+    timerId = setTimeout(() => {
+        filterSP()
+    }, 1000)
+}
+
+el.searchSP.addEventListener("input", debounce)
+
+// select -> event là change
+el.filterSP.addEventListener("change", filterSP)
 
 // hàm hiển thị danh sách sản phẩm
 const renderDanhSachSP = (danhSach) => {
@@ -69,7 +132,10 @@ const renderDanhSachSP = (danhSach) => {
                             class="flex-1 bg-gray-200 px-3 py-2 rounded"
                             onclick="showChiTietSP(${phone.id})"
                         >Xem chi tiết</button>
-                        <button class="flex-1 bg-blue-500 text-white px-3 py-2 rounded">Thêm vào giỏ</button>
+                        <button
+                            class="flex-1 bg-blue-500 text-white px-3 py-2 rounded"
+                            onclick="themVaoGioHang(${phone.id})"
+                            >Thêm vào giỏ</button>
                     </div>
                 </div>    
         `
@@ -80,6 +146,14 @@ const renderDanhSachSP = (danhSach) => {
     // VD: ["a", "b", "c"].join("") -> "abc"
     el.danhSachSP.innerHTML = content.join("")
 }
+
+
+// thêm hàm filter sản phẩm theo tên, mô tả, loại sản phẩm
+// C1: filter trực tiếp data sau khi lấy từ API -> render lại danh sách sản phẩm
+// data từ API -> filter theo từ khóa nhận ở ô search -> render lại danh sách sản phẩm
+
+
+// C2: call API mỗi lần nhập vào ô input -> render lại danh sách sản phẩm
 
 // hàm hiển thị chi tiết sản phẩm
 const showChiTietSP = (phoneId) => {
@@ -125,9 +199,108 @@ const showChiTietSP = (phoneId) => {
         </div>
 
         <p class="mb-4">${phone.desc}</p>
-        <button class="bg-blue-500 text-white px-4 py-2 rounded">Thêm vào giỏ</button>
+        <button
+            class="bg-blue-500 text-white px-4 py-2 rounded"
+            onclick="themVaoGioHang(${phone.id})"
+        >Thêm vào giỏ</button>
     `
     el.popup.classList.remove("hidden")
+}
+
+
+// hàm thêm sản phẩm vào giỏ hàng
+const themVaoGioHang = (phoneId) => {
+    // B1: tìm sản phẩm trong danh sách sản phẩm dựa trên phoneId
+    const phone = danhSachSP.find((phone) => phone.id == phoneId)
+
+    // B2.1: nếu không tìm thấy sản phẩm thì hiển thị thông báo lỗi
+    if (!phone) {
+        alert("Không tìm thấy sản phẩm")
+        return
+    }
+
+    // B2.2: nếu tìm thấy sản phẩm thì thêm vào giỏ hàng
+    // kiểm tra phone này đã có trong giỏ hàng chưa dựa trên id
+    const phoneTrongGioHang = gioHang.find((item) => item.id == phoneId)
+
+    // B2.2.1: kiểm tra sản phẩm này có trong giỏ hàng chưa. Nếu chưa có thì thêm mới với số lượng là 1
+    if (!phoneTrongGioHang) {
+        gioHang.push({
+            ...phone,
+            soLuong: 1
+        })
+    } else { // B2.2.2: nếu đã có trong giỏ hàng thì tăng số lượng lên 1
+        phoneTrongGioHang.soLuong += 1
+    }
+
+    console.log(gioHang)
+    // B3: cập nhật lại số lượng sản phẩm trong giỏ hàng hiển thị ở badge trên nút giỏ hàng
+    // => nên viết hàm xử lý riêng để cập nhật số lượng sản phẩm trong giỏ hàng hiển thị ở badge
+    capNhatSoLuongGioHang()
+}
+
+const capNhatSoLuongGioHang = () => {
+    // tính tổng số lượng sản phẩm trong giỏ hàng
+    // duyệt từng item trong giỏ hàng -> lấy số lượng -> cộng dồn lại -> reduce
+    const tongSoLuong = gioHang.reduce((tong, item) => tong + item.soLuong, 0)
+
+    // cập nhật số lượng sản phẩm trong giỏ hàng hiển thị ở badge
+    el.badgeGioHang.textContent = tongSoLuong
+}
+
+// hàm hiển thị các item trong giỏ hàng
+const renderGioHang = () => {
+    // nếu giỏ hàng rỗng thì hiển thị thông báo
+    if (gioHang.length === 0) {
+        el.popupGioHang.classList.remove("hidden")
+        el.noiDungGioHang.innerHTML = `
+            <h2>Giỏ hàng</h2>
+            <p class="text-gray-500 text-center">Giỏ hàng của bạn đang trống</p>
+        `
+        return
+    }
+    // tạo html để hiển thị giỏ hàng
+    // list item -> map -> list html -> join("") -> string html -> innerHTML
+    const contentHtmlList = gioHang.map((item) => {
+        return `
+            <div
+                    class="flex items-center gap-4 py-4 px-3 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200">
+                    <div class="w-20 h-20 flex-shrink-0 bg-gray-100 rounded-lg p-1">
+                        <img src=${item.img}
+                            alt=${item.name} class="w-full h-full object-contain mix-blend-multiply">
+                    </div>
+
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-semibold text-gray-800 truncate">${item.name}</h3>
+                        <p class="text-blue-600 font-medium text-sm">${item.price.toLocaleString()} <span class="underline">đ</span></p>
+                    </div>
+
+                    <div class="flex items-center border border-gray-200 rounded-full px-1 py-1 shadow-sm bg-white">
+                        <button
+                            class="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors text-gray-600">-</button>
+                        <span class="w-10 text-center font-semibold text-sm text-gray-700">${item.soLuong}</span>
+                        <button
+                            class="w-7 h-7 flex items-center justify-center rounded-full bg-black text-white hover:bg-gray-800 transition-colors">+</button>
+                    </div>
+
+                    <div class="w-32 text-right">
+                        <p class="font-bold text-gray-900">${(item.price * item.soLuong).toLocaleString()} <span class="text-xs uppercase">vnd</span></p>
+                    </div>
+
+                    <button
+                        class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all ml-2">
+                        Xóa
+                    </button>
+                </div>
+        `
+    })
+
+    // gộp tất cả các thẻ html lại thành một chuỗi và hiển thị lên trang
+    el.noiDungGioHang.innerHTML = contentHtmlList.join("")
+
+    // remove class hidden của popup giỏ hàng để hiển thị popup
+    el.popupGioHang.classList.remove("hidden")
+
 }
 
 // ------------------------------------------------------------
@@ -159,20 +332,7 @@ el.overlayGioHang.addEventListener("click", closePopupGioHang)
 
 
 // viết hàm hiển thị giỏ hàng sau khi click vào nút giỏ hàng ở header
-el.btnGioHang.addEventListener("click", () => {
-    el.popupGioHang.classList.remove("hidden")
-
-    // kiểm tra nếu giỏ hàng rỗng thì hiển thị thông báo
-    if(gioHang.length === 0) {
-        el.popupGioHang.innerHTML = `
-            <h2>Giỏ hàng</h2>
-            <p class="text-gray-500 text-center">Giỏ hàng của bạn đang trống</p>
-        `
-        return
-    }
-
-    // continue: hiển thị danh sách sản phẩm trong giỏ hàng
-})
+el.btnGioHang.addEventListener("click", renderGioHang)
 
 // hàm lấy danh sách sản phẩm từ API
 const layDanhSachSP = async () => {
