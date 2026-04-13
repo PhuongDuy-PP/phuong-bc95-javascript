@@ -1,8 +1,6 @@
 import {renderDanhSachSP} from './product-flow.js'
 import {el, state} from './core.js'
 
-let { danhSachSP, timerId } = state
-
 export const filterSP = () => {
     // B1: lấy giá trị từ ô search và select
     // NGUYÊN TẮC: toLowerCase: chuyển chuỗi về chữ thường, trim: xóa khoảng trắng đầu và cuối chuỗi
@@ -10,7 +8,7 @@ export const filterSP = () => {
     const type = el.filterSP.value
 
     // tạo biến để lưu ket quả sau khi filter
-    let ketQua = [...danhSachSP]
+    let ketQua = [...state.danhSachSP]
 
     // B2: lọc sản phẩm theo từ khóa và loại sản phẩm
     // B2.1: filter theo từ khóa
@@ -38,10 +36,10 @@ export const filterSP = () => {
 
 const debounce = () => {
     // HỦY TIMER CŨ NẾU USER NHẬP TIẾP
-    clearTimeout(timerId)
+    clearTimeout(state.timerId)
 
     // TẠO TIMER MỚI, 1s sau gọi hàm filterSP
-    timerId = setTimeout(() => {
+    state.timerId = setTimeout(() => {
         filterSP()
     }, 1000)
 }

@@ -1,10 +1,9 @@
 import {state, el} from './core.js'
-
-let {gioHang} = state
+import { capNhatSoLuongGioHang } from './product-flow.js'
 
 window.tangSoLuong = (phoneId) => {
     // tìm sản phẩm trong giỏ hàng dựa trên id
-    const item = gioHang.find((phone) => phone.id == phoneId)
+    const item = state.gioHang.find((phone) => phone.id == phoneId)
 
     // nếu không tìm thấy sản phẩm thì hiển thị thông báo lỗi
     if (!item) {
@@ -24,7 +23,7 @@ window.tangSoLuong = (phoneId) => {
 
 window.giamSoLuong = (phoneId) => {
     // tìm sản phẩm trong giỏ hàng dựa trên id
-    const item = gioHang.find((phone) => phone.id == phoneId)
+    const item = state.gioHang.find((phone) => phone.id == phoneId)
 
     // nếu không tìm thấy sản phẩm thì hiển thị thông báo lỗi
     if (!item) {
@@ -50,7 +49,7 @@ window.giamSoLuong = (phoneId) => {
 // const -> window -> chuyển xoaSanPham thành global function để có thể gọi được từ HTML
 window.xoaSanPham = (phoneId) => {
     // cập nhật mảng giỏ hàng không chứa sản phẩm muốn xóa
-    gioHang = gioHang.filter((phone) => phone.id != phoneId)
+    state.gioHang = state.gioHang.filter((phone) => phone.id != phoneId)
 
     // cập nhật lại số lượng sản phẩm trong giỏ hàng hiển thị ở badge
     capNhatSoLuongGioHang()
@@ -61,7 +60,7 @@ window.xoaSanPham = (phoneId) => {
 
 export const renderGioHang = () => {
     // nếu giỏ hàng rỗng thì hiển thị thông báo
-    if (gioHang.length === 0) {
+    if (state.gioHang.length === 0) {
         el.popupGioHang.classList.remove("hidden")
         el.noiDungGioHang.innerHTML = `
             <h2>Giỏ hàng</h2>
@@ -71,7 +70,7 @@ export const renderGioHang = () => {
     }
     // tạo html để hiển thị giỏ hàng
     // list item -> map -> list html -> join("") -> string html -> innerHTML
-    const contentHtmlList = gioHang.map((item) => {
+    const contentHtmlList = state.gioHang.map((item) => {
         // thêm logic disable button giảm số lượng khi số lượng bằng 1, không cho giảm nữa
         // toán tử ba ngôi là cách viết gọn của if else
         // điều kiện ? giá trị nếu đúng : giá trị nếu sai
@@ -127,7 +126,7 @@ export const renderGioHang = () => {
     el.noiDungGioHang.innerHTML = contentHtmlList.join("")
 
     // thêm logic tính tổng tiền của giỏ hàng
-    const tongTien = gioHang.reduce((tong, item) => tong + item.price * item.soLuong, 0)
+    const tongTien = state.gioHang.reduce((tong, item) => tong + item.price * item.soLuong, 0)
 
     // ghép HTML hiển thị tổng tiền vào cuối nội dung giỏ hàng
     el.noiDungGioHang.innerHTML += `

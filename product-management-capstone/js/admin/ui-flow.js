@@ -1,0 +1,36 @@
+import { dom } from "./core.js"
+
+export const renderDanhSachSP = (danhSachSP) => {
+    // xóa nội dung cũ
+    dom.productTableBody.innerHTML = ""
+
+    // nếu danh sách sản phẩm rỗng thì hiển thị thông báo
+    if (danhSachSP.length === 0) {
+        dom.productTableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center">Không tìm thấy sản phẩm nào</td>
+            </tr>
+        `
+        return
+    }
+
+    // data api -> map -> list html -> join("") -> string html -> innerHTML
+    const content = danhSachSP.map((phone) => (
+        `
+            <tr class="border-b">
+                <td class="py-2 pr-2">${phone.id}</td>
+                <td class="py-2 pr-2 font-medium">${phone.name}</td>
+                <td class="py-2 pr-2">${Number(phone.price).toLocaleString()} VND</td>
+                <td class="py-2 pr-2">${phone.type}</td>
+                <td>
+                    <div class="flex gap-2">
+                        <button class="px-3 py-1 rounded bg-blue-400 text-white" onclick="editProduct(${phone.id})">Sửa</button>
+                        <button class="px-3 py-1 rounded bg-red-500 text-white" onclick="deleteProduct(${phone.id})">Xóa</button>
+                    </div>
+                </td>
+            </tr>
+        `
+    )).join("")
+    
+    dom.productTableBody.innerHTML = content
+}

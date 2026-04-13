@@ -15,6 +15,9 @@
 
 export const API_URL = "https://69ca679fba5984c44bf31927.mockapi.io/api/v1/phone"
 
+
+// document là thẻ con của window
+
 export const el = {
     danhSachSP: document.getElementById("danhSachSP"),
     loading: document.getElementById("loading"),

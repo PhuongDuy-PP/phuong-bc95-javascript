@@ -1,10 +1,8 @@
 import {el, state, API_URL} from './core.js'
 
-let { danhSachSP } = state
-
 window.showChiTietSP = (phoneId) => {
     // tìm sản phẩm trong danh sách sản phẩm dựa trên id
-    const phone = danhSachSP.find((sp) => sp.id == phoneId)
+    const phone = state.danhSachSP.find((sp) => sp.id == phoneId)
 
     // nếu không tìm thấy sản phẩm thì hiển thị thông báo lỗi
     if (!phone) {
@@ -53,10 +51,10 @@ window.showChiTietSP = (phoneId) => {
     el.popup.classList.remove("hidden")
 }
 
-const capNhatSoLuongGioHang = () => {
+export const capNhatSoLuongGioHang = () => {
     // tính tổng số lượng sản phẩm trong giỏ hàng
     // duyệt từng item trong giỏ hàng -> lấy số lượng -> cộng dồn lại -> reduce
-    const tongSoLuong = gioHang.reduce((tong, item) => tong + item.soLuong, 0)
+    const tongSoLuong = state.gioHang.reduce((tong, item) => tong + item.soLuong, 0)
 
     // cập nhật số lượng sản phẩm trong giỏ hàng hiển thị ở badge
     el.badgeGioHang.textContent = tongSoLuong
@@ -64,7 +62,7 @@ const capNhatSoLuongGioHang = () => {
 
 window.themVaoGioHang = (phoneId) => {
     // B1: tìm sản phẩm trong danh sách sản phẩm dựa trên phoneId
-    const phone = danhSachSP.find((phone) => phone.id == phoneId)
+    const phone = state.danhSachSP.find((phone) => phone.id == phoneId)
 
     // B2.1: nếu không tìm thấy sản phẩm thì hiển thị thông báo lỗi
     if (!phone) {
@@ -74,11 +72,11 @@ window.themVaoGioHang = (phoneId) => {
 
     // B2.2: nếu tìm thấy sản phẩm thì thêm vào giỏ hàng
     // kiểm tra phone này đã có trong giỏ hàng chưa dựa trên id
-    const phoneTrongGioHang = gioHang.find((item) => item.id == phoneId)
+    const phoneTrongGioHang = state.gioHang.find((item) => item.id == phoneId)
 
     // B2.2.1: kiểm tra sản phẩm này có trong giỏ hàng chưa. Nếu chưa có thì thêm mới với số lượng là 1
     if (!phoneTrongGioHang) {
-        gioHang.push({
+        state.gioHang.push({
             ...phone,
             soLuong: 1
         })
@@ -86,7 +84,6 @@ window.themVaoGioHang = (phoneId) => {
         phoneTrongGioHang.soLuong += 1
     }
 
-    console.log(gioHang)
     // B3: cập nhật lại số lượng sản phẩm trong giỏ hàng hiển thị ở badge trên nút giỏ hàng
     // => nên viết hàm xử lý riêng để cập nhật số lượng sản phẩm trong giỏ hàng hiển thị ở badge
     capNhatSoLuongGioHang()
@@ -156,15 +153,15 @@ export const layDanhSachSP = async () => {
     try {
         const response = await axios.get(API_URL)
         // lưu dữ liệu vào biến danhSachSP
-        danhSachSP = response.data
+        state.danhSachSP = response.data
 
-        console.log(danhSachSP)
+        console.log(state.danhSachSP)
 
         // ẩn loading
         el.loading.classList.add("hidden")
 
         // hiển thị danh sách sản phẩm -> viết hàm renderDanhSachSP
-        renderDanhSachSP(danhSachSP)
+        renderDanhSachSP(state.danhSachSP)
 
     } catch (error) {
         // show error message
