@@ -16,6 +16,7 @@ const el = {
     // giỏ hàng
     popupGioHang: document.getElementById("popupGioHang"),
     overlayGioHang: document.getElementById("overlayGioHang"),
+    btnCloseGioHang: document.getElementById("btnCloseGioHang"),
     noiDungGioHang: document.getElementById("noiDungGioHang"),
 
     // header
@@ -130,11 +131,13 @@ const renderDanhSachSP = (danhSach) => {
                     <div class="flex gap-2 mt-auto">
                         <button
                             class="flex-1 bg-gray-200 px-3 py-2 rounded"
-                            onclick="showChiTietSP(${phone.id})"
+                            data-action="show-detail"
+                            data-id="${phone.id}"
                         >Xem chi tiết</button>
                         <button
                             class="flex-1 bg-blue-500 text-white px-3 py-2 rounded"
-                            onclick="themVaoGioHang(${phone.id})"
+                            data-action="add-to-cart"
+                            data-id="${phone.id}"
                             >Thêm vào giỏ</button>
                     </div>
                 </div>    
@@ -201,7 +204,8 @@ const showChiTietSP = (phoneId) => {
         <p class="mb-4">${phone.desc}</p>
         <button
             class="bg-blue-500 text-white px-4 py-2 rounded"
-            onclick="themVaoGioHang(${phone.id})"
+            data-action="add-to-cart"
+            data-id="${phone.id}"
         >Thêm vào giỏ</button>
     `
     el.popup.classList.remove("hidden")
@@ -248,6 +252,30 @@ const capNhatSoLuongGioHang = () => {
     el.badgeGioHang.textContent = tongSoLuong
 }
 
+const tangSoLuong = (phoneId) => {
+    const item = gioHang.find((phone) => phone.id == phoneId)
+    if (!item) return
+
+    item.soLuong += 1
+    capNhatSoLuongGioHang()
+    renderGioHang()
+}
+
+const giamSoLuong = (phoneId) => {
+    const item = gioHang.find((phone) => phone.id == phoneId)
+    if (!item || item.soLuong <= 1) return
+
+    item.soLuong -= 1
+    capNhatSoLuongGioHang()
+    renderGioHang()
+}
+
+const xoaSanPham = (phoneId) => {
+    gioHang = gioHang.filter((phone) => phone.id != phoneId)
+    capNhatSoLuongGioHang()
+    renderGioHang()
+}
+
 // hàm hiển thị các item trong giỏ hàng
 const renderGioHang = () => {
     // nếu giỏ hàng rỗng thì hiển thị thông báo
@@ -277,10 +305,16 @@ const renderGioHang = () => {
 
                     <div class="flex items-center border border-gray-200 rounded-full px-1 py-1 shadow-sm bg-white">
                         <button
-                            class="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors text-gray-600">-</button>
+                            class="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors text-gray-600"
+                            data-action="decrease"
+                            data-id="${item.id}"
+                        >-</button>
                         <span class="w-10 text-center font-semibold text-sm text-gray-700">${item.soLuong}</span>
                         <button
-                            class="w-7 h-7 flex items-center justify-center rounded-full bg-black text-white hover:bg-gray-800 transition-colors">+</button>
+                            class="w-7 h-7 flex items-center justify-center rounded-full bg-black text-white hover:bg-gray-800 transition-colors"
+                            data-action="increase"
+                            data-id="${item.id}"
+                        >+</button>
                     </div>
 
                     <div class="w-32 text-right">
@@ -288,7 +322,10 @@ const renderGioHang = () => {
                     </div>
 
                     <button
-                        class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all ml-2">
+                        class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all ml-2"
+                        data-action="remove"
+                        data-id="${item.id}"
+                    >
                         Xóa
                     </button>
                 </div>
@@ -327,6 +364,39 @@ const closePopupGioHang = () => {
 }
 
 el.overlayGioHang.addEventListener("click", closePopupGioHang)
+el.btnCloseGioHang.addEventListener("click", closePopupGioHang)
+
+el.btnClosePopup.addEventListener("click", closePopupChiTiet)
+
+el.danhSachSP.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-action]")
+    if (!button) return
+
+    const action = button.dataset.action
+    const phoneId = button.dataset.id
+
+    if (action === "show-detail") showChiTietSP(phoneId)
+    if (action === "add-to-cart") themVaoGioHang(phoneId)
+})
+
+el.contentPopup.addEventListener("click", (event) => {
+    const button = event.target.closest('button[data-action="add-to-cart"]')
+    if (!button) return
+
+    themVaoGioHang(button.dataset.id)
+})
+
+el.noiDungGioHang.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-action]")
+    if (!button) return
+
+    const action = button.dataset.action
+    const phoneId = button.dataset.id
+
+    if (action === "increase") tangSoLuong(phoneId)
+    if (action === "decrease") giamSoLuong(phoneId)
+    if (action === "remove") xoaSanPham(phoneId)
+})
 
 // --------------------------------------------------------------
 
