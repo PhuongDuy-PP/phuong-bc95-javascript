@@ -1,4 +1,4 @@
-import { dom } from "./core.js"
+import { dom, state } from "./core.js"
 
 export const renderDanhSachSP = (danhSachSP) => {
     // xóa nội dung cũ
@@ -33,4 +33,28 @@ export const renderDanhSachSP = (danhSachSP) => {
     )).join("")
     
     dom.productTableBody.innerHTML = content
+}
+
+// viết hàm lấy dữ liệu từ form để các hàm create/update có thể tái sử dụng
+export const getProductDataFromForm = () => {
+    return {
+        name: dom.name.value.trim(),
+        price: dom.price.value.trim(),
+        img: dom.img.value.trim(),
+        screen: dom.screen.value.trim(),
+        backCamera: dom.backCamera.value.trim(),
+        frontCamera: dom.frontCamera.value.trim(),
+        desc: dom.desc.value.trim(),
+        type: dom.type.value
+    }
+}
+
+// hàm này sẽ dùng ở các hàm create/update để reset form sau khi thao tác thành công
+export const resetForm = () => {
+    dom.productForm.reset()
+    state.editingProduct = null
+
+    // mở lại nút tạo mới và ẩn nút cập nhật
+    dom.btnSave.classList.remove("hidden")
+    dom.btnUpdate.classList.add("hidden")
 }
